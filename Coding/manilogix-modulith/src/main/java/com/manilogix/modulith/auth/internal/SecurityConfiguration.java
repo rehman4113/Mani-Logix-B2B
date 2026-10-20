@@ -40,7 +40,7 @@ class SecurityConfiguration {
   });
   return http.csrf(csrf -> csrf.disable())
     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/signup", "/api/auth/login").permitAll().anyRequest().authenticated())
+    .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/signup", "/api/auth/login", "/actuator/health", "/actuator/health/**").permitAll().anyRequest().authenticated())
     .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(converter))).build();
  }
 }
