@@ -2,7 +2,7 @@
 
 Use the tested `postgres` profile for a dedicated ManiLogix Neon project. The default MySQL profile and the MySQL legacy exporter/importer remain available, but do not point this PostgreSQL deployment at the Finance or Stayforge databases.
 
-Set the Vercel project's Git repository to `rehman4113/Mani-Logix-B2B` with root directory `Coding/manilogix-modulith`. Vercel detects `Dockerfile.vercel`, builds the Java 21 HTTP container Function, and provides the runtime port through `PORT`.
+Set the Vercel project's Git repository to `rehman4113/Mani-Logix-B2B` with repository root directory. Vercel detects the repository-root `Dockerfile.vercel`, builds the Java 21 HTTP container Function, and provides the runtime port through `PORT`.
 
 Configure encrypted runtime variables:
 - `SPRING_PROFILES_ACTIVE=postgres`
