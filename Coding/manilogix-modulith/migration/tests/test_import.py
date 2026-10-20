@@ -20,7 +20,8 @@ SAMPLE = {
  "inventory":[{"_id":"507f1f77bcf86cd799439011","name":"Widget","supplierId":"7","category":"Parts","quantity":10,"reorderLevel":2}],
  "orders":[{"order_id":15,"customer_id":"old-customer","status":"DISPATCHED"}],
  "order_items":[{"order_order_id":15,"item_ids":"507f1f77bcf86cd799439011"}],
- "notifications":[{"_id":"507f1f77bcf86cd799439012","userId":"admin","message":"Existing alert","type":"ALERT"}]
+ "notifications":[{"_id":"507f1f77bcf86cd799439012","userId":"admin","message":"Existing alert","type":"ALERT"},
+                  {"_id":"507f1f77bcf86cd799439013","userId":"1","message":"Your order changed","type":"INFO"}]
 }
 class ImportTest(unittest.TestCase):
  def test_preflight_rejects_missing_owner(self):
@@ -48,7 +49,7 @@ class ImportTest(unittest.TestCase):
    apply(connection,SAMPLE,prepared,checksum)
    with connection.cursor() as cursor:
     for table,expected in (("app_users",2),("suppliers",1),("inventory_items",1),
-                            ("legacy_records",2),("legacy_migration_runs",1),("purchase_orders",0)):
+                            ("legacy_records",3),("notifications",1),("legacy_migration_runs",1),("purchase_orders",0)):
      cursor.execute("SELECT COUNT(*) AS count FROM "+table)
      self.assertEqual(cursor.fetchone()["count"],expected)
     cursor.execute("SELECT active,needs_price_review,quantity,category,legacy_mongo_id FROM inventory_items")

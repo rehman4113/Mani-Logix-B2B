@@ -88,7 +88,17 @@ def prepare(snapshot, owners):
             source_id=strict_text(value(row,"order_id","orderId","id","_id"),source_type+" ID")
             if (source_type,source_id) in ids: raise ValueError("Duplicate "+source_type+" ID")
             ids.add((source_type,source_id))
-    return {"users":users,"suppliers":suppliers,"inventory":inventory,
+    active_notes=[]
+    for note in snapshot["notifications"]:
+        recipient=str(value(note,"userId","user_id") or "").strip().lower()
+        mapped=by_id.get(int(recipient)) if recipient.isdecimal() else by_email.get(recipient)
+        message=str(value(note,"message") or "")
+        if mapped and message and len(message)<=255:
+            active_notes.append({"id":strict_text(value(note,"_id","id"),"notification Mongo ID"),
+                "userId":mapped["id"],"message":message,
+                "type":str(value(note,"type") or "INFO")[:40],
+                "createdAt":utc_datetime(value(note,"timestamp"))})
+    return {"activeNotes":active_notes,"users":users,"suppliers":suppliers,"inventory":inventory,
        "orders":snapshot["orders"],"orderItems":snapshot["order_items"],
        "notifications":snapshot["notifications"]}
 
@@ -135,11 +145,17 @@ def apply(connection, snapshot, prepared, checksum):
                     cur.execute("INSERT INTO legacy_records(source_type,source_id,payload_json,review_status) VALUES ('ORDER',%s,%s,'REQUIRES_REVIEW')",
                         (order_id,json.dumps(payload,sort_keys=True,default=str)))
                 if by_order: raise ValueError("Order item rows exist without a parent order")
+                mapped_notes={note["id"]:note for note in prepared["activeNotes"]}
                 for note in prepared["notifications"]:
                     mongo_id=strict_text(value(note,"_id","id"),"notification Mongo ID")
-                    cur.execute("INSERT INTO legacy_records(source_type,source_id,payload_json,review_status) VALUES ('NOTIFICATION',%s,%s,'REQUIRES_REVIEW')",
-                        (mongo_id,json.dumps(note,sort_keys=True,default=str)))
-                summary={k:len(prepared[k]) for k in ("users","suppliers","inventory","orders","orderItems","notifications")}
+                    mapped=mapped_notes.get(mongo_id)
+                    cur.execute("INSERT INTO legacy_records(source_type,source_id,payload_json,review_status) VALUES ('NOTIFICATION',%s,%s,%s)",
+                        (mongo_id,json.dumps(note,sort_keys=True,default=str),"IMPORTED" if mapped else "REQUIRES_REVIEW"))
+                    if mapped:
+                        cur.execute("""INSERT INTO notifications(user_id,order_id,kind,message,created_at,legacy_mongo_id,legacy_type)
+                            VALUES (%s,NULL,%s,%s,%s,%s,%s)""",
+                            (mapped["userId"],"LEGACY_"+mapped["type"],mapped["message"],mapped["createdAt"],mongo_id,mapped["type"]))
+                summary={k:len(prepared[k]) for k in ("users","suppliers","inventory","orders","orderItems","notifications","activeNotes")}
                 cur.execute("INSERT INTO legacy_migration_runs(snapshot_sha256,summary_json) VALUES (%s,%s)",
                     (checksum,json.dumps(summary,sort_keys=True)))
             connection.commit()
@@ -160,7 +176,7 @@ def main():
     snapshot=json.loads(data)
     owners=json.loads(Path(args.owner_map).read_text()) if args.owner_map else {}
     prepared=prepare(snapshot,owners)
-    summary={k:len(prepared[k]) for k in ("users","suppliers","inventory","orders","orderItems","notifications")}
+    summary={k:len(prepared[k]) for k in ("users","suppliers","inventory","orders","orderItems","notifications","activeNotes")}
     checksum=hashlib.sha256(data).hexdigest()
     print("Preflight OK:",summary,"SHA-256:",checksum)
     if not args.apply: return
