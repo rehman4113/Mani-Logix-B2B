@@ -16,14 +16,15 @@ import org.springframework.web.server.ResponseStatusException;
 class InventoryController {
  private final InventoryRepository items;private final SupplierDirectory suppliers;private final CurrentUser user;
  InventoryController(InventoryRepository items,SupplierDirectory suppliers,CurrentUser user) {this.items=items;this.suppliers=suppliers;this.user=user;}
- record Input(@NotNull @Positive Long supplierId,@NotBlank String name,@NotNull @PositiveOrZero Integer quantity,
+ record Input(@NotNull @Positive Long supplierId,@NotBlank String name,String category,@NotNull @PositiveOrZero Integer quantity,
   @NotNull @PositiveOrZero Integer reorderLevel,@NotNull @DecimalMin("0.00") BigDecimal unitPrice){}
- record View(long id,long supplierId,String name,int quantity,int reorderLevel,BigDecimal unitPrice,boolean active){}
- private View view(InventoryItem i) {return new View(i.id,i.supplierId,i.name,i.quantity,i.reorderLevel,i.unitPrice,i.active);}
+ record View(long id,long supplierId,String name,String category,int quantity,int reorderLevel,BigDecimal unitPrice,boolean active,boolean needsPriceReview){}
+ private View view(InventoryItem i) {return new View(i.id,i.supplierId,i.name,i.category,i.quantity,i.reorderLevel,i.unitPrice,i.active,i.needsPriceReview);}
  @PostMapping @ResponseStatus(HttpStatus.CREATED) @Transactional
  View create(@Valid @RequestBody Input input) {
   suppliers.requireActive(input.supplierId());suppliers.requireOwnerOrStaff(input.supplierId());
-  return view(items.save(new InventoryItem(input.supplierId(),input.name(),input.quantity(),input.reorderLevel(),input.unitPrice())));
+  InventoryItem item=new InventoryItem(input.supplierId(),input.name(),input.quantity(),input.reorderLevel(),input.unitPrice());
+  item.category=input.category();return view(items.save(item));
  }
  @GetMapping
  Page<View> all(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size) {
@@ -47,7 +48,11 @@ class InventoryController {
   InventoryItem item=items.lockById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   suppliers.requireOwnerOrStaff(item.supplierId);
   if (!item.supplierId.equals(input.supplierId())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Supplier cannot be changed");
-  item.name=input.name();item.quantity=input.quantity();item.reorderLevel=input.reorderLevel();item.unitPrice=input.unitPrice();
+  item.name=input.name();item.category=input.category();item.quantity=input.quantity();item.reorderLevel=input.reorderLevel();item.unitPrice=input.unitPrice();
+  if(item.needsPriceReview) {
+   if(input.unitPrice().signum()<=0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Confirm a positive price before enabling imported stock");
+   item.needsPriceReview=false;item.active=true;
+  }
   return view(item);
  }
  @DeleteMapping("/{id}") @Transactional

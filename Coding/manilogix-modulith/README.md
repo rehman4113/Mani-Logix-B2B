@@ -24,7 +24,7 @@ Flyway creates the schema. Hibernate validates it. Flyway creates the Spring Mod
 
 ## Migration from the old services
 
-This is a **new schema**, not an in-place upgrade. The old databases were auth MySQL, supplier MySQL, order MySQL, inventory MongoDB, and notification MongoDB. Do not point this application at an existing service database or disable Flyway. Back up every source first. Import users while preserving IDs, BCrypt hashes and roles (reject unknown or duplicate emails). Import suppliers with a valid owner user; map inventory Mongo string IDs to new numeric item IDs; remap order item IDs and supplier IDs; reconcile stock against pending and confirmed orders. Convert old notifications only after matching user IDs; generate a separate Flyway data migration or audited import utility for each source. Compare counts, ownership, stock and order totals before cutover. No automatic import is included, because the source data and ID relationships have not been inspected.
+Use the [migration runbook](migration/README.md) for a read-only snapshot from the legacy MySQL and MongoDB databases, offline preflight, and transactional import into an empty Flyway V1–V3 MySQL schema. Historical orders and notifications are preserved for review; imported inventory stays inactive until priced.
 
 ## Current scope
 

@@ -5,7 +5,9 @@ import java.time.Instant;
 class Notification {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id;
  @Column(nullable=false) public Long userId;
- @Column(nullable=false) public Long orderId;
+ public Long orderId;
+ @Column(unique=true,length=100) public String legacyMongoId;
+ public String legacyType;
  @Column(nullable=false) public String kind;
  @Column(nullable=false) public String message;
  @Column(nullable=false) public Instant createdAt=Instant.now();

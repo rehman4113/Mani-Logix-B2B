@@ -7,6 +7,9 @@ public class Supplier {
  @Column(nullable=false) public String name;
  @Column(nullable=false) public String email;
  @Column(nullable=false) public Long ownerUserId;
+ public String contactNumber;
+ public String address;
+ public String company;
  @Column(nullable=false) public boolean active=true;
  @Column(nullable=false) public Instant createdAt=Instant.now();
  protected Supplier() {}

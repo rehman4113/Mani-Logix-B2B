@@ -1,0 +1,19 @@
+ALTER TABLE app_users ADD COLUMN first_name VARCHAR(255) NULL, ADD COLUMN last_name VARCHAR(255) NULL;
+ALTER TABLE suppliers ADD COLUMN contact_number VARCHAR(255) NULL, ADD COLUMN address VARCHAR(255) NULL, ADD COLUMN company VARCHAR(255) NULL;
+ALTER TABLE inventory_items ADD COLUMN category VARCHAR(255) NULL, ADD COLUMN legacy_mongo_id VARCHAR(100) NULL UNIQUE,
+ ADD COLUMN needs_price_review BIT NOT NULL DEFAULT 0;
+ALTER TABLE notifications MODIFY order_id BIGINT NULL, ADD COLUMN legacy_mongo_id VARCHAR(100) NULL UNIQUE,
+ ADD COLUMN legacy_type VARCHAR(40) NULL;
+CREATE TABLE legacy_records (
+ source_type VARCHAR(40) NOT NULL,
+ source_id VARCHAR(120) NOT NULL,
+ payload_json LONGTEXT NOT NULL,
+ review_status VARCHAR(40) NOT NULL DEFAULT 'REQUIRES_REVIEW',
+ PRIMARY KEY (source_type, source_id)
+);
+CREATE TABLE legacy_migration_runs (
+ id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ snapshot_sha256 CHAR(64) NOT NULL UNIQUE,
+ imported_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+ summary_json TEXT NOT NULL
+);

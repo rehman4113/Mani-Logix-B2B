@@ -6,6 +6,9 @@ public class InventoryItem {
  @Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id;
  @Column(nullable=false) public Long supplierId;
  @Column(nullable=false) public String name;
+ public String category;
+ @Column(unique=true,length=100) public String legacyMongoId;
+ @Column(nullable=false) public boolean needsPriceReview=false;
  @Column(nullable=false) public int quantity;
  @Column(nullable=false) public int reorderLevel;
  @Column(nullable=false,precision=15,scale=2) public BigDecimal unitPrice;
