@@ -1,0 +1,17 @@
+{
+  "services": {
+    "backend": {
+      "root": "Coding/manilogix-modulith",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    }
+  ]
+}
