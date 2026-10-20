@@ -57,9 +57,10 @@ class OrderController {
  @GetMapping @Transactional(readOnly=true)
  List<View> list() {
   if(user.hasRole("ADMIN") || user.hasRole("MANAGER")) return orders.findAll().stream().map(this::view).toList();
-  if(user.hasRole("SUPPLIER")) return orders.findAll().stream().filter(o -> {
-   try {suppliers.requireOwnerOrStaff(o.supplierId);return true;} catch(ResponseStatusException denied) {return false;}
-  }).map(this::view).toList();
+  if(user.hasRole("SUPPLIER")) {
+   var owned=suppliers.ownedSupplierIds();
+   return owned.isEmpty()?List.of():orders.findBySupplierIdIn(owned).stream().map(this::view).toList();
+  }
   return orders.findByCustomerId(user.id()).stream().map(this::view).toList();
  }
  @GetMapping("/{id}") @Transactional(readOnly=true)

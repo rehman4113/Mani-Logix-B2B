@@ -8,6 +8,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class SupplierDirectory {
  private final SupplierRepository suppliers; private final CurrentUser user;
  public SupplierDirectory(SupplierRepository suppliers, CurrentUser user) { this.suppliers=suppliers; this.user=user; }
+ public java.util.List<Long> ownedSupplierIds() {
+  return suppliers.findByOwnerUserIdAndActiveTrue(user.id()).stream().map(s -> s.id).toList();
+ }
  public void requireActive(long supplierId) {
   if (!suppliers.existsByIdAndActiveTrue(supplierId)) throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Supplier is not active");
  }

@@ -10,5 +10,6 @@ interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder,Long> {
  Optional<PurchaseOrder> lockById(long id);
  List<PurchaseOrder> findByCustomerId(long customerId);
  List<PurchaseOrder> findBySupplierId(long supplierId);
+ List<PurchaseOrder> findBySupplierIdIn(List<Long> supplierIds);
 }
 

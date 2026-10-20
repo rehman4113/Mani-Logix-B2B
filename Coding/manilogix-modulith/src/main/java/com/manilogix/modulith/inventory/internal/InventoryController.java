@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +25,16 @@ class InventoryController {
   suppliers.requireActive(input.supplierId());suppliers.requireOwnerOrStaff(input.supplierId());
   return view(items.save(new InventoryItem(input.supplierId(),input.name(),input.quantity(),input.reorderLevel(),input.unitPrice())));
  }
- @GetMapping @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
- List<View> all() {return items.findAll().stream().filter(i->i.active).map(this::view).toList();}
+ @GetMapping
+ Page<View> all(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size) {
+  if(page<0 || size<1 || size>100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid page size");
+  var request=PageRequest.of(page,size);
+  if(user.hasRole("SUPPLIER")) {
+   var owned=suppliers.ownedSupplierIds();
+   return owned.isEmpty()?Page.empty(request):items.findBySupplierIdInAndActiveTrue(owned,request).map(this::view);
+  }
+  return items.findByActiveTrue(request).map(this::view);
+ }
  @GetMapping("/{id}") View one(@PathVariable long id) {
   InventoryItem item=items.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   if (!item.active) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
