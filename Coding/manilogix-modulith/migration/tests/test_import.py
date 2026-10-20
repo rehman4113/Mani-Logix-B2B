@@ -53,7 +53,7 @@ class ImportTest(unittest.TestCase):
      self.assertEqual(cursor.fetchone()["count"],expected)
     cursor.execute("SELECT active,needs_price_review,quantity,category,legacy_mongo_id FROM inventory_items")
     item=cursor.fetchone()
-    self.assertEqual((item["active"],item["needs_price_review"],item["quantity"],item["category"],item["legacy_mongo_id"]),
+    self.assertEqual((int.from_bytes(item["active"],"big"),int.from_bytes(item["needs_price_review"],"big"),item["quantity"],item["category"],item["legacy_mongo_id"]),
      (0,1,10,"Parts","507f1f77bcf86cd799439011"))
     cursor.execute("SELECT payload_json FROM legacy_records WHERE source_type='ORDER'")
     archived=json.loads(cursor.fetchone()["payload_json"])
