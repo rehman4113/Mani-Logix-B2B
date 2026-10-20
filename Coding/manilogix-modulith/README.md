@@ -12,7 +12,7 @@ mvn test
 mvn spring-boot:run
 ```
 
-Flyway creates the schema. Hibernate validates it. Spring Modulith JDBC creates its event publication table; the order notification listener persists after commit. The module structure test rejects cycles and references into another module's internals.
+Flyway creates the schema. Hibernate validates it. Flyway creates the Spring Modulith JDBC event publication table; the order notification listener persists after commit. The module structure test rejects cycles and references into another module's internals.
 
 ## APIs
 
