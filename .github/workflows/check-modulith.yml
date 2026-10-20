@@ -1,0 +1,21 @@
+name: Check Modulith Conversion
+on:
+  push:
+    branches: [modulith-conversion]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Coding/manilogix-modulith
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: Coding/manilogix-modulith/pom.xml
+      - run: mvn -B test
