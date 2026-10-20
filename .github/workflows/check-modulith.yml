@@ -7,6 +7,24 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testsecret
+          MYSQL_DATABASE: manilogix
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -ptestsecret"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      DB_URL: jdbc:mysql://127.0.0.1:3306/manilogix
+      DB_USERNAME: root
+      DB_PASSWORD: testsecret
+      JWT_SECRET: integration-test-secret-at-least-thirty-two-bytes
+      BOOTSTRAP_ADMIN_EMAIL: admin@example.test
+      BOOTSTRAP_ADMIN_PASSWORD: temporary-admin-password
     defaults:
       run:
         working-directory: Coding/manilogix-modulith
