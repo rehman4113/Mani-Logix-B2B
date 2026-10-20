@@ -36,7 +36,7 @@ class SecurityConfiguration {
   JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
   converter.setJwtGrantedAuthoritiesConverter(jwt -> {
    Collection<String> roles = jwt.getClaimAsStringList("roles");
-   return roles == null ? java.util.List.of() : roles.stream().map(r -> new SimpleGrantedAuthority("ROLE_" + r)).toList();
+   return roles == null ? java.util.List.of() : roles.stream().map(r -> (org.springframework.security.core.GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + r)).toList();
   });
   return http.csrf(csrf -> csrf.disable())
     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
