@@ -1,3 +1,11 @@
+# ManiLogix
+
+The consolidated Spring Modulith application is in [Coding/manilogix-modulith](Coding/manilogix-modulith/README.md). It is the implementation for new development. The services in `Coding/*-service` are retained as migration references; do not start them alongside the Modulith against the same data. Historical MySQL and MongoDB data has **not** been imported. Read the [flow review](Coding/manilogix-modulith/FLOW_REVIEW.md) and migration notes before cutover.
+
+---
+
+## Original microservices README (historical)
+
 # 🏭 ManiLogix – Enterprise Supply Chain Management System
 
 **ManiLogix** is a scalable, microservices-based backend system designed to manage B2B supply chain operations like supplier onboarding, inventory control, order processing, and role-based access via JWT. Built entirely using **Spring Boot Microservices**, it's modular, maintainable, and ready for frontend integration or deployment on cloud-native infrastructure.

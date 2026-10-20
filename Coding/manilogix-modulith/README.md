@@ -17,8 +17,8 @@ Flyway creates the schema. Hibernate validates it. Flyway creates the Spring Mod
 ## APIs
 
 - `POST /api/auth/signup` registers a CUSTOMER. `POST /api/auth/login` returns a bearer token. Public signup cannot create privileged users.
-- `POST /api/suppliers` is admin only; supplier owners can view and edit their own profile. An existing supplier account's numeric user ID is required.
-- `POST /api/inventory` creates stock for an active supplier; owner, manager, or admin can manage it. `GET /api/inventory/{id}` reads one listed item.
+- `POST /api/auth/users` provisions supplier and manager users as admin. `POST /api/suppliers` is admin only; supplier owners can view and edit their own profile. An existing supplier account's numeric user ID is required.
+- `GET /api/inventory?page=0&size=20` browses active stock. `POST /api/inventory` creates stock for an active supplier; owner, manager, or admin can manage it. `GET /api/inventory/{id}` reads one listed item.
 - `POST /api/orders` takes `{"items":[{"itemId":1,"quantity":2}],"deliveryAddress":"..."}` for a CUSTOMER. The authenticated user becomes the customer. Items must belong to one supplier; stock is reserved under row locks in the same database transaction. `PATCH /api/orders/{id}/status?status=CONFIRMED` advances PENDING → CONFIRMED → SHIPPED → DELIVERED. Cancellation from PENDING/CONFIRMED returns stock once.
 - `GET /api/notifications` returns the caller's notifications; only admin can list all.
 
