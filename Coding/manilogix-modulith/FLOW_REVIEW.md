@@ -22,7 +22,7 @@
 
 ## Remaining work before real business use
 
-- **Data migration:** Import old MySQL users/suppliers/orders and MongoDB stock/notifications with an audited ID mapping and reconciliation. Nothing is automatically copied.
+- **Data migration:** A [read-only export and transactional MySQL importer](migration/README.md) now handles users, suppliers and inventory, with old orders and uncertain notifications archived for review. The actual source databases are unavailable here, so a real import, ID review and reconciliation remain pending.
 - **B2B lifecycle:** Add purchase order approval, supplier acceptance, partial fulfillment, returns, pricing/currency/tax, invoice and payment records. The current order is a simple single supplier purchase.
 - **Inventory accounting:** Record immutable stock movements with reasons and actor IDs. Restrict manual quantity replacement once orders exist; use adjustments rather than overwriting stock.
 - **Operational hardening:** Paginate order and notification lists; cap request payloads; add login rate limits, refresh/revocation rules, pagination filters, monitoring and backup exercises.
